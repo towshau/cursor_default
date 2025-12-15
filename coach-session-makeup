@@ -1,0 +1,90 @@
+# Coach Session Expectations Flowchart
+
+```mermaid
+flowchart TD
+    Start([System Starts]) --> FilterStaff{Filter Staff}
+    
+    FilterStaff -->|Active Status| CheckRole{Check Role}
+    FilterStaff -->|Inactive| Exclude[Exclude from calculations]
+    
+    CheckRole -->|Senior Coach, Gym Manager,<br/>Coach, Head Coach,<br/>Advanced Coach,<br/>Head Boxing Coach| CheckEmployment{Check Employment Type}
+    CheckRole -->|Other Roles| Exclude
+    
+    CheckEmployment -->|FTE| GetFTEHours[Get 38 hours from<br/>system_config: 'Full Time Hours']
+    CheckEmployment -->|PTE| GetPTEHours[Get 19 hours from<br/>system_config: 'Part Time Hours']
+    CheckEmployment -->|CASUAL| Exclude
+    
+    GetFTEHours --> CalculateRoleHours[Calculate Role Hours]
+    GetPTEHours --> CalculateRoleHours
+    
+    CalculateRoleHours --> RM[Results Manager:<br/>Active Clients × 0.33 hrs]
+    CalculateRoleHours --> Handoff[Handoff Coach:<br/>Handoff Clients × 0.33 hrs]
+    CalculateRoleHours --> Prog[Programming Coach:<br/>Programming Clients × 0.04 hrs]
+    CalculateRoleHours --> Revenue[Revenue Team:<br/>Assigned Clients × 0.02 hrs]
+    CalculateRoleHours --> Renewal[Renewal Lead:<br/>Renewal Clients × 0.06 hrs]
+    CalculateRoleHours --> Nutrition[Nutrition Lead:<br/>Nutrition Clients × 0.075 hrs]
+    CalculateRoleHours --> HR[HR Direct Report:<br/>Direct Reports × 1.0 hr]
+    CalculateRoleHours --> Supp[Supplementary Hours:<br/>Default + Additional]
+    
+    RM --> SumHours[Sum All Role Hours]
+    Handoff --> SumHours
+    Prog --> SumHours
+    Revenue --> SumHours
+    Renewal --> SumHours
+    Nutrition --> SumHours
+    HR --> SumHours
+    Supp --> SumHours
+    
+    SumHours --> CalcRemaining[Calculate Remaining Hours:<br/>Weekly Allocation - Total Role Hours]
+    
+    CalcRemaining --> CalcSessions[Calculate Contract Sessions:<br/>Remaining Hours ÷ 0.7 hrs]
+    
+    CalcSessions --> RealTimeView[view_coach_session_expectations<br/>Real-time View<br/>Shows: Current + 90 days ahead]
+    
+    CalcSessions --> LogFunction{upsert_coach_expectations_from_workload<br/>Function Called?}
+    
+    LogFunction -->|Yes| StoreLog[Store in<br/>coach_session_expectation_log<br/>Historical Snapshot]
+    LogFunction -->|No| RealTimeView
+    
+    StoreLog --> SnapshotFunction{Snapshot Function<br/>Called?}
+    
+    SnapshotFunction -->|Yes| AdjustForHolidays[Adjust for Holidays & Leave<br/>via view_session_balance_adjusted_25]
+    SnapshotFunction -->|No| End1([End])
+    
+    AdjustForHolidays --> CompareActual[Compare with Actual Hours<br/>from coach_session_actual]
+    
+    CompareActual --> StoreSnapshot[Store in<br/>coach_weekly_hours_snapshot<br/>Adjusted Snapshot]
+    
+    StoreSnapshot --> End2([End])
+    RealTimeView --> End3([End])
+    
+    style Exclude fill:#ffcccc,stroke:#333,stroke-width:2px,color:#000
+    style GetFTEHours fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style GetPTEHours fill:#cce5ff,stroke:#333,stroke-width:2px,color:#000
+    style RealTimeView fill:#ccffcc,stroke:#333,stroke-width:2px,color:#000
+    style StoreLog fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style StoreSnapshot fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style Start fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style FilterStaff fill:#ffe1cc,stroke:#333,stroke-width:2px,color:#000
+    style CheckRole fill:#ffe1cc,stroke:#333,stroke-width:2px,color:#000
+    style CheckEmployment fill:#ffe1cc,stroke:#333,stroke-width:2px,color:#000
+    style CalculateRoleHours fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style RM fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style Handoff fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style Prog fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style Revenue fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style Renewal fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style Nutrition fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style HR fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style Supp fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style SumHours fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style CalcRemaining fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style CalcSessions fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style LogFunction fill:#ffe1cc,stroke:#333,stroke-width:2px,color:#000
+    style SnapshotFunction fill:#ffe1cc,stroke:#333,stroke-width:2px,color:#000
+    style AdjustForHolidays fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style CompareActual fill:#fff4cc,stroke:#333,stroke-width:2px,color:#000
+    style End1 fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style End2 fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+    style End3 fill:#e1f5ff,stroke:#333,stroke-width:2px,color:#000
+```
