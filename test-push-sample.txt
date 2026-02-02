@@ -1,0 +1,11 @@
+Sample text for testing GitHub push from Cursor
+===============================================
+
+This file was created to practice:
+1. Staging changes (git add)
+2. Committing (git commit)
+3. Pushing to https://github.com/towshau/cursor_default
+
+If you can see this on GitHub, your push worked!
+
+Created: February 2026
